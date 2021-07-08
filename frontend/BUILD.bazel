@@ -1,0 +1,22 @@
+load("@io_bazel_rules_docker//nodejs:image.bzl", "nodejs_image")
+
+nodejs_image(
+    name = "image",
+    entry_point = "@npm//:node_modules/next/dist/bin/next",
+    chdir = "nextjs",
+    templated_args = ["dev"],
+    data = glob(["src/**"]) + [
+      ".babelrc",
+      "tsconfig.json",
+      "@npm//next",
+      "@npm//react",
+      "@npm//react-dom",
+      "@npm//styled-components",
+      "@npm//@types/node",
+      "@npm//@types/react",
+      "@npm//@types/react-dom",
+      "@npm//@types/styled-components",
+      "@npm//babel-plugin-styled-components",
+      "@npm//typescript",
+    ],
+)

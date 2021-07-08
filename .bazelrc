@@ -1,0 +1,16 @@
+build --disk_cache=~/.cache/bazel-disk-cache
+build --symlink_prefix=dist/ --experimental_no_product_name_out_symlink
+test --test_output=summary
+coverage --instrument_test_targets
+
+test:debug --test_output=streamed --test_strategy=exclusive --test_timeout=9999 --nocache_test_results --define=VERBOSE_LOGS=1
+run:debug --define=VERBOSE_LOGS=1 -- --node_options=--inspect-brk
+build:debug --compilation_mode=dbg
+
+# required for building docker images from a non-linux platform
+# https://bazelbuild.github.io/rules_nodejs/install.html#cross-compilation
+build --platforms=@build_bazel_rules_nodejs//toolchains/node:linux_amd64
+run --platforms=@build_bazel_rules_nodejs//toolchains/node:linux_amd64
+test --platforms=@build_bazel_rules_nodejs//toolchains/node:linux_amd64
+
+try-import %workspace%/.bazelrc.user

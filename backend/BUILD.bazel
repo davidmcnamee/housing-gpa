@@ -1,0 +1,15 @@
+load("@io_bazel_rules_docker//python3:image.bzl", "py3_image")
+load("@pip//:requirements.bzl", "requirement")
+
+py3_image(
+  name = "backend",
+  srcs = [
+    "manage.py",
+  ],
+  layers = [
+    requirement("django"),
+    
+  ]
+  main = "manage.py",
+  args = ["runserver", "8000"]
+)
