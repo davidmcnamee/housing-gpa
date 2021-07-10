@@ -9,8 +9,8 @@ build:debug --compilation_mode=dbg
 
 # required for building docker images from a non-linux platform
 # https://bazelbuild.github.io/rules_nodejs/install.html#cross-compilation
-build --platforms=@build_bazel_rules_nodejs//toolchains/node:linux_amd64
-run --platforms=@build_bazel_rules_nodejs//toolchains/node:linux_amd64
-test --platforms=@build_bazel_rules_nodejs//toolchains/node:linux_amd64
+# build --platforms=@build_bazel_rules_nodejs//toolchains/node:linux_amd64
+# run --platforms=@build_bazel_rules_nodejs//toolchains/node:linux_amd64
+# test --platforms=@build_bazel_rules_nodejs//toolchains/node:linux_amd64
 
 try-import %workspace%/.bazelrc.user

@@ -1,8 +1,16 @@
-#!/usr/bin/env python
+import sys
+print(sys.argv)
+print("hello")
+print(open(sys.argv[0], "r").read())
+print(sys.executable)
+print(sys.version)
+print(sys.version_info)
+
+# thing: "int" = 5
+
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-
 
 def main():
     """Run administrative tasks."""
