@@ -60,6 +60,8 @@ container_pull(
     repository = "distroless/python3-debian10",
     tag = "latest",
 )
+load("@io_bazel_rules_docker//go:image.bzl", _go_image_repos = "repositories")
+_go_image_repos()
 load("@io_bazel_rules_docker//python3:image.bzl", _py3_image_repos = "repositories")
 _py3_image_repos()
 load("@io_bazel_rules_docker//nodejs:image.bzl", _nodejs_image_repos = "repositories")

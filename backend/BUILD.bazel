@@ -1,23 +1,9 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
-
-go_library(
-    name = "student-housing-backend_lib",
-    srcs = ["main.go"],
-    importpath = "github.com/davidmcnamee/student-housing-backend",
-    visibility = ["//visibility:private"],
-    deps = ["@com_github_graphql_go_graphql//:go_default_library"],
-)
+# load("@io_bazel_rules_docker//go:image.bzl", "go_image")
 
 go_binary(
-    name = "backend",
-    embed = [":backend_lib"],
-    visibility = ["//visibility:public"],
-)
-
-go_library(
-    name = "backend_lib",
-    srcs = ["main.go"],
-    importpath = "github.com/davidmcnamee/student-housing-backend/backend",
-    visibility = ["//visibility:private"],
-    deps = ["@com_github_graphql_go_graphql//:go_default_library"],
+  name = "backend",
+  srcs = ["main.go"],
+  importpath = "github.com/davidmcnamee/student-housing-backend/backend",
+  deps = ["@com_github_graphql_go_graphql//:go_default_library"],
 )
