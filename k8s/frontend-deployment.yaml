@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+spec:
+  selector:
+    matchLabels:
+      name: frontend-pod
+  replicas: 1
+  template:
+    metadata:
+      name: frontend-pod
+      labels:
+        name: frontend-pod
+    spec:
+      containers:
+        - name: frontend
+          image: davidmc1/frontend-image
+          ports:
+            - containerPort: 3000
+          resources:
+            limits:
+              cpu: "0.5"
+              memory: "128Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  labels:
+    name: frontend-service
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8080
+      targetPort: 3000
+  selector:
+    name: frontend-pod

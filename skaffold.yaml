@@ -1,0 +1,23 @@
+apiVersion: skaffold/v2beta14
+kind: Config
+portForward:
+  - resourceType: service
+    resourceName: frontend-service
+    port: 8080
+    localPort: 8080
+build:
+  artifacts:
+    - image: davidmc1/frontend-image
+      context: .
+      bazel:
+        target: //frontend:image.tar
+        args:
+          ["--platforms=@build_bazel_rules_nodejs//toolchains/node:linux_amd64"]
+      sync:
+        manual:
+          - src: "frontend/src/**"
+            dest: .
+    # - image: davidmc1/backend-image
+    #   context: .
+    #   bazel:
+    #     target: //backend:image.tar

@@ -1,32 +1,23 @@
-load("@io_bazel_rules_docker//python3:image.bzl", "py3_image")
-load("@io_bazel_rules_docker//container:container.bzl", "container_image")
-load("@pip//:requirements.bzl", "requirement")
-load("@rules_python//python:defs.bzl", "py_binary")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 
-
-py_binary(
-  name = "backend",
-  srcs = [
-    "manage.py",
-    requirement("django"),
-    "//backend/server"
-  ],
-  main = "manage.py",
-  args = ["runserver", "8000"],
-  srcs_version = "PY3",
+go_library(
+    name = "student-housing-backend_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/davidmcnamee/student-housing-backend",
+    visibility = ["//visibility:private"],
+    deps = ["@com_github_graphql_go_graphql//:go_default_library"],
 )
 
-py3_image(
-  name = "image",
-  base = "@py3_image_base//image",
-  layers = [
-    requirement("django"),
-    "//backend/server"
-  ],
-  srcs = [
-    "manage.py",
-  ],
-  main = "manage.py",
-  args = ["runserver", "8000"],
-  srcs_version = "PY3",
+go_binary(
+    name = "backend",
+    embed = [":backend_lib"],
+    visibility = ["//visibility:public"],
+)
+
+go_library(
+    name = "backend_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/davidmcnamee/student-housing-backend/backend",
+    visibility = ["//visibility:private"],
+    deps = ["@com_github_graphql_go_graphql//:go_default_library"],
 )
