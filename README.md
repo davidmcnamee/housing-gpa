@@ -21,7 +21,15 @@ kubectl config use-context k3d-k3s-default
 > `localhost:8080` serves the frontend app,
 > `localhost:3000` serves the GraphQL playground
 
-## Running scripts
+### Running scripts
 
 Create a `.env` file in the root directory (containing the secrets given to you), then run `bazel run //scripts:my_script`.
 
+## Roadmap
+
+Attributes needed:
+* address or building name or approximate location
+* price
+* number of rooms total
+* 
+* 
