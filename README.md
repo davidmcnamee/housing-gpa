@@ -15,7 +15,6 @@ First, install these:
 k3d cluster create
 k3d cluster start
 kubectl config use-context k3d-k3s-default
-bazelisk
 ```
 3. run `skaffold dev` (this will take a while if it's your first time)
 
