@@ -5,10 +5,13 @@ portForward:
     resourceName: frontend-service
     port: 8080
     localPort: 8080
+  - resourceType: service
+    resourceName: backend-service
+    port: 3000
+    localPort: 3000
 build:
   artifacts:
-    - image: davidmc1/frontend-image
-      context: .
+    - image: davidmc1/student-housing-frontend
       bazel:
         target: //frontend:image.tar
         args:
@@ -17,7 +20,8 @@ build:
         manual:
           - src: "frontend/src/**"
             dest: .
-    # - image: davidmc1/backend-image
-    #   context: .
-    #   bazel:
-    #     target: //backend:image.tar
+    - image: davidmc1/student-housing-backend
+      bazel:
+        target: //backend:backend.tar
+        args:
+          ["--platforms=@io_bazel_rules_go//go/toolchain:linux_amd64"]
