@@ -1,1 +1,2 @@
-django==3.2.5
+pyppeteer==0.2.5
+python-dotenv==0.18.0

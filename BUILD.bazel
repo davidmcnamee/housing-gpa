@@ -1,0 +1,6 @@
+
+filegroup(
+    name = "env",
+    srcs = [".env"],
+    visibility = ["//scripts:__pkg__"],
+)
