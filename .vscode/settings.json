@@ -1,1 +1,5 @@
-{}
+{
+  "python.formatting.provider": "autopep8",
+  "git.ignoreLimitWarning": true
+  
+}
