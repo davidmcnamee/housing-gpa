@@ -3,10 +3,16 @@ load("@pip//:requirements.bzl", "requirement")
 
 py_binary(
   name = "scrape_fb",
+  deps = [
+    "//scripts/gpt3",
+    "//scripts/common",
+  ],
   srcs = [
     "scrape_fb.py",
     requirement("pyppeteer"),
     requirement("python-dotenv"),
   ],
-  data = ["//:env"],
+  data = [
+    "//:env",
+  ],
 )

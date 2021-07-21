@@ -2,5 +2,5 @@
 filegroup(
     name = "env",
     srcs = [".env"],
-    visibility = ["//scripts:__pkg__"],
+    visibility = ["//scripts:__subpackages__"],
 )

@@ -6,6 +6,9 @@ from typing import List, cast
 from dotenv import find_dotenv, load_dotenv
 from pyppeteer import launch
 from pyppeteer.element_handle import ElementHandle
+from pyppeteer.page import Page
+from common.types import FacebookPost
+from gpt3.scan_post import scan
 
 load_dotenv()
 print('.env loaded from:', find_dotenv())
@@ -27,6 +30,28 @@ async def get_texts(root: ElementHandle, xpath: str, property: str) -> List[str]
   vals = await asyncio.gather(*[node.getProperty(property) for node in nodes])
   return [cast(str, await val.jsonValue()) for val in vals]
 
+async def click_see_more(page: Page):
+  for see_more in (await page.xpath('//div[text()="See More"]'))[:-1]:
+  # while see_more := await page.xpath('//div[text()="See More"]'):
+    # for whatever reason, it can't click "See More" in the group "About" section
+    see_more = [see_more]
+    # if len(see_more) == 1: break
+    print('clicking on ', await (await see_more[0].getProperty('outerHTML')).jsonValue())
+    try:
+      await see_more[0].click(delay=300)
+    except Exception as e:
+      print("couldn't click: ", e)
+      break
+    await page.waitFor(1000)
+
+async def scroll_page(page: Page):
+  for _ in range(10):
+      await page.waitFor(1000)
+      await click_see_more(page)
+      await page.evaluate("{window.scrollBy(0, document.body.scrollHeight);}")
+      await page.waitFor(1000)
+      await click_see_more(page)
+
 async def main():
     browser = await launch(headless=False, autoClose=False)
     await browser._connection.send('Browser.grantPermissions', {
@@ -47,28 +72,20 @@ async def main():
       asyncio.create_task(page.goto('https://www.facebook.com/groups/1028477820535630')),
       asyncio.create_task(page.waitForNavigation()),
     ])
-    await page.waitFor(2000)
-    await page.evaluate("{window.scrollBy(0, document.body.scrollHeight);}")
+    await scroll_page(page)
     await page.waitForXPath('//div[@role="article"]//div[@data-ad-preview="message"]/../..//div[text()="See More"]')
     posts = await page.xpath('//div[@role="article"]//div[@data-ad-preview="message"]/../..')
-    while see_more := await page.xpath('//div[text()="See More"]'):
-      # for whatever reason, it can't click "See More" in the group "About" section
-      if len(see_more) == 1: break
-      print('clicking on ', see_more[0])
-      await see_more[0].click(delay=300)
-      await page.waitFor(1000)
+    
+    data = []
     for post in posts:
       link = get_text(post, '//a[contains(@href,"/commerce/listing")]', 'href')
       pics = get_texts(post, '//a[contains(@href,"/commerce/listing")]//img', 'src')
       main_text = get_text_selector(post, ':first-child', 'textContent')
       bottom_text = get_text_selector(post, ':last-child', 'innerText')
       link, pics, main_text, bottom_text = await asyncio.gather(link, pics, main_text, bottom_text)
-      info = {
-        "link": link, 
-        "pics": pics, 
-        "main_text": main_text, 
-        "bottom_text": bottom_text
-      }
-      print(info)
+      info = FacebookPost(link, pics, main_text, bottom_text)
+      data.append(info)
+    await scan(data)
+    print("done ", len(data))
 
 asyncio.get_event_loop().run_until_complete(main())
