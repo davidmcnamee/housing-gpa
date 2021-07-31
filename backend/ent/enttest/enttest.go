@@ -4,10 +4,9 @@ package enttest
 
 import (
 	"context"
-
-	"github.com/davidmcnamee/student-housing-backend/ent"
+	"student-housing-backend/ent"
 	// required by schema hooks.
-	_ "github.com/davidmcnamee/student-housing-backend/ent/runtime"
+	_ "student-housing-backend/ent/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
 )

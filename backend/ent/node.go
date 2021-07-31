@@ -6,6 +6,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"student-housing-backend/ent/todo"
+	"student-housing-backend/ent/user"
 	"sync"
 	"sync/atomic"
 
@@ -14,7 +16,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/schema"
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/davidmcnamee/student-housing-backend/ent/user"
 	"github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/semaphore"
 )
@@ -46,20 +47,46 @@ type Edge struct {
 	IDs  []int  `json:"ids,omitempty"`  // node ids (where this edge point to).
 }
 
+func (t *Todo) Node(ctx context.Context) (node *Node, err error) {
+	node = &Node{
+		ID:     t.ID,
+		Type:   "Todo",
+		Fields: make([]*Field, 0),
+		Edges:  make([]*Edge, 0),
+	}
+	return node, nil
+}
+
 func (u *User) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     u.ID,
 		Type:   "User",
-		Fields: make([]*Field, 1),
+		Fields: make([]*Field, 3),
 		Edges:  make([]*Edge, 0),
 	}
 	var buf []byte
-	if buf, err = json.Marshal(u.Username); err != nil {
+	if buf, err = json.Marshal(u.Age); err != nil {
 		return nil, err
 	}
 	node.Fields[0] = &Field{
+		Type:  "int",
+		Name:  "age",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(u.Name); err != nil {
+		return nil, err
+	}
+	node.Fields[1] = &Field{
 		Type:  "string",
-		Name:  "username",
+		Name:  "name",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(u.Nickname); err != nil {
+		return nil, err
+	}
+	node.Fields[2] = &Field{
+		Type:  "string",
+		Name:  "nickname",
 		Value: string(buf),
 	}
 	return node, nil
@@ -132,6 +159,15 @@ func (c *Client) Noder(ctx context.Context, id int, opts ...NodeOption) (_ Noder
 
 func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error) {
 	switch table {
+	case todo.Table:
+		n, err := c.Todo.Query().
+			Where(todo.ID(id)).
+			CollectFields(ctx, "Todo").
+			Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
 	case user.Table:
 		n, err := c.User.Query().
 			Where(user.ID(id)).
@@ -214,6 +250,19 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 		idmap[id] = append(idmap[id], &noders[i])
 	}
 	switch table {
+	case todo.Table:
+		nodes, err := c.Todo.Query().
+			Where(todo.IDIn(ids...)).
+			CollectFields(ctx, "Todo").
+			All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
 	case user.Table:
 		nodes, err := c.User.Query().
 			Where(user.IDIn(ids...)).

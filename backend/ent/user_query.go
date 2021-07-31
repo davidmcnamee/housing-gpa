@@ -7,12 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"student-housing-backend/ent/predicate"
+	"student-housing-backend/ent/user"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/davidmcnamee/student-housing-backend/ent/predicate"
-	"github.com/davidmcnamee/student-housing-backend/ent/user"
 )
 
 // UserQuery is the builder for querying User entities.
@@ -253,12 +253,12 @@ func (uq *UserQuery) Clone() *UserQuery {
 // Example:
 //
 //	var v []struct {
-//		Username string `json:"username,omitempty"`
+//		Age int `json:"age,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		GroupBy(user.FieldUsername).
+//		GroupBy(user.FieldAge).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -280,11 +280,11 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Username string `json:"username,omitempty"`
+//		Age int `json:"age,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		Select(user.FieldUsername).
+//		Select(user.FieldAge).
 //		Scan(ctx, &v)
 //
 func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {

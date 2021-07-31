@@ -5,9 +5,9 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"student-housing-backend/ent/user"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/davidmcnamee/student-housing-backend/ent/user"
 )
 
 // User is the model entity for the User schema.
@@ -15,8 +15,12 @@ type User struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// Username holds the value of the "username" field.
-	Username string `json:"username,omitempty"`
+	// Age holds the value of the "age" field.
+	Age int `json:"age,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
+	// Nickname holds the value of the "nickname" field.
+	Nickname string `json:"nickname,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -24,9 +28,9 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldID:
+		case user.FieldID, user.FieldAge:
 			values[i] = new(sql.NullInt64)
-		case user.FieldUsername:
+		case user.FieldName, user.FieldNickname:
 			values[i] = new(sql.NullString)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
@@ -49,11 +53,23 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			u.ID = int(value.Int64)
-		case user.FieldUsername:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field username", values[i])
+		case user.FieldAge:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field age", values[i])
 			} else if value.Valid {
-				u.Username = value.String
+				u.Age = int(value.Int64)
+			}
+		case user.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				u.Name = value.String
+			}
+		case user.FieldNickname:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field nickname", values[i])
+			} else if value.Valid {
+				u.Nickname = value.String
 			}
 		}
 	}
@@ -83,8 +99,12 @@ func (u *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
-	builder.WriteString(", username=")
-	builder.WriteString(u.Username)
+	builder.WriteString(", age=")
+	builder.WriteString(fmt.Sprintf("%v", u.Age))
+	builder.WriteString(", name=")
+	builder.WriteString(u.Name)
+	builder.WriteString(", nickname=")
+	builder.WriteString(u.Nickname)
 	builder.WriteByte(')')
 	return builder.String()
 }

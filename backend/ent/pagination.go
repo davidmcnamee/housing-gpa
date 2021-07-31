@@ -10,11 +10,12 @@ import (
 	"io"
 	"strconv"
 	"strings"
+	"student-housing-backend/ent/todo"
+	"student-housing-backend/ent/user"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/errcode"
-	"github.com/davidmcnamee/student-housing-backend/ent/user"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"github.com/vmihailenco/msgpack/v5"
 )
@@ -231,6 +232,233 @@ const (
 	pageInfoField   = "pageInfo"
 	totalCountField = "totalCount"
 )
+
+// TodoEdge is the edge representation of Todo.
+type TodoEdge struct {
+	Node   *Todo  `json:"node"`
+	Cursor Cursor `json:"cursor"`
+}
+
+// TodoConnection is the connection containing edges to Todo.
+type TodoConnection struct {
+	Edges      []*TodoEdge `json:"edges"`
+	PageInfo   PageInfo    `json:"pageInfo"`
+	TotalCount int         `json:"totalCount"`
+}
+
+// TodoPaginateOption enables pagination customization.
+type TodoPaginateOption func(*todoPager) error
+
+// WithTodoOrder configures pagination ordering.
+func WithTodoOrder(order *TodoOrder) TodoPaginateOption {
+	if order == nil {
+		order = DefaultTodoOrder
+	}
+	o := *order
+	return func(pager *todoPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultTodoOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithTodoFilter configures pagination filter.
+func WithTodoFilter(filter func(*TodoQuery) (*TodoQuery, error)) TodoPaginateOption {
+	return func(pager *todoPager) error {
+		if filter == nil {
+			return errors.New("TodoQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type todoPager struct {
+	order  *TodoOrder
+	filter func(*TodoQuery) (*TodoQuery, error)
+}
+
+func newTodoPager(opts []TodoPaginateOption) (*todoPager, error) {
+	pager := &todoPager{}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultTodoOrder
+	}
+	return pager, nil
+}
+
+func (p *todoPager) applyFilter(query *TodoQuery) (*TodoQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *todoPager) toCursor(t *Todo) Cursor {
+	return p.order.Field.toCursor(t)
+}
+
+func (p *todoPager) applyCursors(query *TodoQuery, after, before *Cursor) *TodoQuery {
+	for _, predicate := range cursorsToPredicates(
+		p.order.Direction, after, before,
+		p.order.Field.field, DefaultTodoOrder.Field.field,
+	) {
+		query = query.Where(predicate)
+	}
+	return query
+}
+
+func (p *todoPager) applyOrder(query *TodoQuery, reverse bool) *TodoQuery {
+	direction := p.order.Direction
+	if reverse {
+		direction = direction.reverse()
+	}
+	query = query.Order(direction.orderFunc(p.order.Field.field))
+	if p.order.Field != DefaultTodoOrder.Field {
+		query = query.Order(direction.orderFunc(DefaultTodoOrder.Field.field))
+	}
+	return query
+}
+
+// Paginate executes the query and returns a relay based cursor connection to Todo.
+func (t *TodoQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...TodoPaginateOption,
+) (*TodoConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newTodoPager(opts)
+	if err != nil {
+		return nil, err
+	}
+
+	if t, err = pager.applyFilter(t); err != nil {
+		return nil, err
+	}
+
+	conn := &TodoConnection{Edges: []*TodoEdge{}}
+	if !hasCollectedField(ctx, edgesField) || first != nil && *first == 0 || last != nil && *last == 0 {
+		if hasCollectedField(ctx, totalCountField) ||
+			hasCollectedField(ctx, pageInfoField) {
+			count, err := t.Count(ctx)
+			if err != nil {
+				return nil, err
+			}
+			conn.TotalCount = count
+			conn.PageInfo.HasNextPage = first != nil && count > 0
+			conn.PageInfo.HasPreviousPage = last != nil && count > 0
+		}
+		return conn, nil
+	}
+
+	if (after != nil || first != nil || before != nil || last != nil) && hasCollectedField(ctx, totalCountField) {
+		count, err := t.Clone().Count(ctx)
+		if err != nil {
+			return nil, err
+		}
+		conn.TotalCount = count
+	}
+
+	t = pager.applyCursors(t, after, before)
+	t = pager.applyOrder(t, last != nil)
+	var limit int
+	if first != nil {
+		limit = *first + 1
+	} else if last != nil {
+		limit = *last + 1
+	}
+	if limit > 0 {
+		t = t.Limit(limit)
+	}
+
+	if field := getCollectedField(ctx, edgesField, nodeField); field != nil {
+		t = t.collectField(graphql.GetOperationContext(ctx), *field)
+	}
+
+	nodes, err := t.All(ctx)
+	if err != nil || len(nodes) == 0 {
+		return conn, err
+	}
+
+	if len(nodes) == limit {
+		conn.PageInfo.HasNextPage = first != nil
+		conn.PageInfo.HasPreviousPage = last != nil
+		nodes = nodes[:len(nodes)-1]
+	}
+
+	var nodeAt func(int) *Todo
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *Todo {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *Todo {
+			return nodes[i]
+		}
+	}
+
+	conn.Edges = make([]*TodoEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		conn.Edges[i] = &TodoEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+
+	conn.PageInfo.StartCursor = &conn.Edges[0].Cursor
+	conn.PageInfo.EndCursor = &conn.Edges[len(conn.Edges)-1].Cursor
+	if conn.TotalCount == 0 {
+		conn.TotalCount = len(nodes)
+	}
+
+	return conn, nil
+}
+
+// TodoOrderField defines the ordering field of Todo.
+type TodoOrderField struct {
+	field    string
+	toCursor func(*Todo) Cursor
+}
+
+// TodoOrder defines the ordering of Todo.
+type TodoOrder struct {
+	Direction OrderDirection  `json:"direction"`
+	Field     *TodoOrderField `json:"field"`
+}
+
+// DefaultTodoOrder is the default ordering of Todo.
+var DefaultTodoOrder = &TodoOrder{
+	Direction: OrderDirectionAsc,
+	Field: &TodoOrderField{
+		field: todo.FieldID,
+		toCursor: func(t *Todo) Cursor {
+			return Cursor{ID: t.ID}
+		},
+	},
+}
+
+// ToEdge converts Todo into TodoEdge.
+func (t *Todo) ToEdge(order *TodoOrder) *TodoEdge {
+	if order == nil {
+		order = DefaultTodoOrder
+	}
+	return &TodoEdge{
+		Node:   t,
+		Cursor: order.Field.toCursor(t),
+	}
+}
 
 // UserEdge is the edge representation of User.
 type UserEdge struct {

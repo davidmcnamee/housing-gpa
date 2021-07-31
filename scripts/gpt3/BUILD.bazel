@@ -2,16 +2,16 @@ load("@rules_python//python:defs.bzl", "py_library")
 load("@pip//:requirements.bzl", "requirement")
 
 py_library(
-  name = "gpt3",
-  deps = ["//scripts/common"],
-  srcs = [
-    "scan_post.py",
-    requirement("python-dotenv"),
-    requirement("chevron"),
-  ],
-  data = [
-    "//:env",
-    "gpt3-template.mustache",
-  ],
-  visibility = ["//visibility:public"],
+    name = "gpt3",
+    srcs = [
+        "scan_post.py",
+        requirement("python-dotenv"),
+        requirement("chevron"),
+    ],
+    data = [
+        "gpt3-template.mustache",
+        "//:env",
+    ],
+    visibility = ["//visibility:public"],
+    deps = ["//scripts/common"],
 )

@@ -2,17 +2,17 @@ load("@rules_python//python:defs.bzl", "py_binary")
 load("@pip//:requirements.bzl", "requirement")
 
 py_binary(
-  name = "scrape_fb",
-  deps = [
-    "//scripts/gpt3",
-    "//scripts/common",
-  ],
-  srcs = [
-    "scrape_fb.py",
-    requirement("pyppeteer"),
-    requirement("python-dotenv"),
-  ],
-  data = [
-    "//:env",
-  ],
+    name = "scrape_fb",
+    srcs = [
+        "scrape_fb.py",
+        requirement("pyppeteer"),
+        requirement("python-dotenv"),
+    ],
+    data = [
+        "//:env",
+    ],
+    deps = [
+        "//scripts/common",
+        "//scripts/gpt3",
+    ],
 )

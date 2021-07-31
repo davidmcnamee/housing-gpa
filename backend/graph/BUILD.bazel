@@ -6,9 +6,10 @@ go_library(
         "resolver.go",
         "schema.resolvers.go",
     ],
-    importpath = "github.com/davidmcnamee/student-housing-backend/graph",
+    importpath = "student-housing-backend/graph",
     visibility = ["//visibility:public"],
     deps = [
+        "//backend/ent",
         "//backend/graph/generated",
         "//backend/graph/model",
     ],

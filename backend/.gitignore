@@ -1,0 +1,7 @@
+main
+ent/*
+!ent/schema
+!ent/generate.go
+graph/generated
+graph/model/models_gen.go
+db.sqlite3

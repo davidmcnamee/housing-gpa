@@ -3,9 +3,10 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "generated",
     srcs = ["generated.go"],
-    importpath = "github.com/davidmcnamee/student-housing-backend/graph/generated",
+    importpath = "student-housing-backend/graph/generated",
     visibility = ["//visibility:public"],
     deps = [
+        "//backend/ent",
         "//backend/graph/model",
         "@com_github_99designs_gqlgen//graphql",
         "@com_github_99designs_gqlgen//graphql/introspection",

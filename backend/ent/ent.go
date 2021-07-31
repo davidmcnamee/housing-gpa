@@ -5,10 +5,11 @@ package ent
 import (
 	"errors"
 	"fmt"
+	"student-housing-backend/ent/todo"
+	"student-housing-backend/ent/user"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/davidmcnamee/student-housing-backend/ent/user"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -29,6 +30,7 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
+		todo.Table: todo.ValidColumn,
 		user.Table: user.ValidColumn,
 	}
 	check, ok := checks[table]

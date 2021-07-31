@@ -6,17 +6,21 @@ package graph
 import (
 	"context"
 	"fmt"
-
-	"github.com/davidmcnamee/student-housing-backend/graph/generated"
-	"github.com/davidmcnamee/student-housing-backend/graph/model"
+	"strconv"
+	"student-housing-backend/ent"
+	"student-housing-backend/graph/generated"
+	"student-housing-backend/graph/model"
+	"time"
 )
 
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*ent.User, error) {
+	num := time.Now().UnixNano()
+	fmt.Println("CreateUser" + strconv.FormatInt(num, 10))
+	return r.Client.User.Create().SetAge(30).SetNickname(input.Name + strconv.FormatInt(num, 10)).SetName(input.Name).Save(context.Background())
 }
 
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) Users(ctx context.Context) ([]*ent.User, error) {
+	return r.Client.User.Query().All(context.Background())
 }
 
 // Mutation returns generated.MutationResolver implementation.

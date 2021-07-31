@@ -6,10 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"student-housing-backend/ent/user"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/davidmcnamee/student-housing-backend/ent/user"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -19,15 +19,21 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
-// SetUsername sets the "username" field.
-func (uc *UserCreate) SetUsername(s string) *UserCreate {
-	uc.mutation.SetUsername(s)
+// SetAge sets the "age" field.
+func (uc *UserCreate) SetAge(i int) *UserCreate {
+	uc.mutation.SetAge(i)
 	return uc
 }
 
-// SetID sets the "id" field.
-func (uc *UserCreate) SetID(i int) *UserCreate {
-	uc.mutation.SetID(i)
+// SetName sets the "name" field.
+func (uc *UserCreate) SetName(s string) *UserCreate {
+	uc.mutation.SetName(s)
+	return uc
+}
+
+// SetNickname sets the "nickname" field.
+func (uc *UserCreate) SetNickname(s string) *UserCreate {
+	uc.mutation.SetNickname(s)
 	return uc
 }
 
@@ -85,8 +91,14 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
-	if _, ok := uc.mutation.Username(); !ok {
-		return &ValidationError{Name: "username", err: errors.New("ent: missing required field \"username\"")}
+	if _, ok := uc.mutation.Age(); !ok {
+		return &ValidationError{Name: "age", err: errors.New("ent: missing required field \"age\"")}
+	}
+	if _, ok := uc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+	}
+	if _, ok := uc.mutation.Nickname(); !ok {
+		return &ValidationError{Name: "nickname", err: errors.New("ent: missing required field \"nickname\"")}
 	}
 	return nil
 }
@@ -99,10 +111,8 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		}
 		return nil, err
 	}
-	if _node.ID == 0 {
-		id := _spec.ID.Value.(int64)
-		_node.ID = int(id)
-	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -117,17 +127,29 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
-	if id, ok := uc.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
+	if value, ok := uc.mutation.Age(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldAge,
+		})
+		_node.Age = value
 	}
-	if value, ok := uc.mutation.Username(); ok {
+	if value, ok := uc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: user.FieldUsername,
+			Column: user.FieldName,
 		})
-		_node.Username = value
+		_node.Name = value
+	}
+	if value, ok := uc.mutation.Nickname(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldNickname,
+		})
+		_node.Nickname = value
 	}
 	return _node, _spec
 }
@@ -172,10 +194,8 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 				}
 				mutation.id = &nodes[i].ID
 				mutation.done = true
-				if nodes[i].ID == 0 {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

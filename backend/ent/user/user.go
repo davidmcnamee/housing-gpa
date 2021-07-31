@@ -7,8 +7,12 @@ const (
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldUsername holds the string denoting the username field in the database.
-	FieldUsername = "username"
+	// FieldAge holds the string denoting the age field in the database.
+	FieldAge = "age"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
+	// FieldNickname holds the string denoting the nickname field in the database.
+	FieldNickname = "nickname"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 )
@@ -16,7 +20,9 @@ const (
 // Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
-	FieldUsername,
+	FieldAge,
+	FieldName,
+	FieldNickname,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

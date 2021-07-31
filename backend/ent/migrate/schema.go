@@ -8,10 +8,22 @@ import (
 )
 
 var (
+	// TodosColumns holds the columns for the "todos" table.
+	TodosColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+	}
+	// TodosTable holds the schema information for the "todos" table.
+	TodosTable = &schema.Table{
+		Name:       "todos",
+		Columns:    TodosColumns,
+		PrimaryKey: []*schema.Column{TodosColumns[0]},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "username", Type: field.TypeString},
+		{Name: "age", Type: field.TypeInt},
+		{Name: "name", Type: field.TypeString},
+		{Name: "nickname", Type: field.TypeString, Unique: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -21,6 +33,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		TodosTable,
 		UsersTable,
 	}
 )

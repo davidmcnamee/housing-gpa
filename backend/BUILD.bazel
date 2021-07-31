@@ -1,22 +1,25 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
 load("@bazel_gazelle//:def.bzl", "gazelle")
 load("@io_bazel_rules_docker//go:image.bzl", "go_image")
 
-# to update dependencies: bazel run //backend:gazelle -- update-repos -from_file=$(PWD)/backend/go.mod -to_macro=deps.bzl%go_dependencies
+# to update dependencies (from WORKSPACE root): bazel run //backend:gazelle -- update-repos -from_file=$(PWD)/backend/go.mod -to_macro=deps.bzl%go_dependencies
 # to update local files: bazel run //backend:gazelle
-# gazelle:prefix github.com/davidmcnamee/student-housing-backend
+# gazelle:prefix student-housing-backend
 gazelle(name = "gazelle")
 
 go_library(
     name = "student-housing-backend_lib",
     srcs = ["server.go"],
-    importpath = "github.com/davidmcnamee/student-housing-backend",
+    importpath = "student-housing-backend",
     visibility = ["//visibility:private"],
     deps = [
+        "//backend/ent",
         "//backend/graph",
         "//backend/graph/generated",
+        "@com_github_99designs_gqlgen//cmd",
         "@com_github_99designs_gqlgen//graphql/handler",
         "@com_github_99designs_gqlgen//graphql/playground",
+        "@com_github_mattn_go_sqlite3//:go_default_library",
     ],
 )
 

@@ -5,12 +5,12 @@ package ent
 import (
 	"context"
 	"fmt"
+	"student-housing-backend/ent/predicate"
+	"student-housing-backend/ent/user"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/davidmcnamee/student-housing-backend/ent/predicate"
-	"github.com/davidmcnamee/student-housing-backend/ent/user"
 )
 
 // UserDelete is the builder for deleting a User entity.

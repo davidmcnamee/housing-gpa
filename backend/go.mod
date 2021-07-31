@@ -1,13 +1,14 @@
-module github.com/davidmcnamee/student-housing-backend
+module student-housing-backend
 
 go 1.16
 
 require (
-	entgo.io/contrib v0.0.0-20210713071936-e00756339862 // indirect
+	entgo.io/contrib v0.0.0-20210726113942-478c3f3c33cb
 	entgo.io/ent v0.8.1-0.20210630104730-a19a89a141cf
 	github.com/99designs/gqlgen v0.13.0
-	github.com/agnivade/levenshtein v1.1.0 // indirect
-	github.com/hashicorp/golang-lru v0.5.4 // indirect
+	github.com/hashicorp/go-multierror v1.1.1
+	github.com/mattn/go-sqlite3 v1.14.7
 	github.com/vektah/gqlparser/v2 v2.1.0
-	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
+	github.com/vmihailenco/msgpack/v5 v5.0.0-beta.9
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 )

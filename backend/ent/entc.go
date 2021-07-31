@@ -3,11 +3,11 @@
 package main
 
 import (
-	"log"
+    "log"
 
-	"entgo.io/contrib/entgql"
-	"entgo.io/ent/entc"
-	"entgo.io/ent/entc/gen"
+    "entgo.io/ent/entc"
+    "entgo.io/ent/entc/gen"
+    "entgo.io/contrib/entgql"
 )
 
 func main() {

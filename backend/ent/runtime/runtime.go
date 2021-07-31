@@ -2,7 +2,7 @@
 
 package runtime
 
-// The schema-stitching logic is generated in github.com/davidmcnamee/student-housing-backend/ent/runtime.go
+// The schema-stitching logic is generated in student-housing-backend/ent/runtime.go
 
 const (
 	Version = "(devel)" // Version of ent codegen.

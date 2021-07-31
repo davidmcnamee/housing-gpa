@@ -5,12 +5,12 @@ package ent
 import (
 	"context"
 	"fmt"
+	"student-housing-backend/ent/predicate"
+	"student-housing-backend/ent/user"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/davidmcnamee/student-housing-backend/ent/predicate"
-	"github.com/davidmcnamee/student-housing-backend/ent/user"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -26,9 +26,28 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return uu
 }
 
-// SetUsername sets the "username" field.
-func (uu *UserUpdate) SetUsername(s string) *UserUpdate {
-	uu.mutation.SetUsername(s)
+// SetAge sets the "age" field.
+func (uu *UserUpdate) SetAge(i int) *UserUpdate {
+	uu.mutation.ResetAge()
+	uu.mutation.SetAge(i)
+	return uu
+}
+
+// AddAge adds i to the "age" field.
+func (uu *UserUpdate) AddAge(i int) *UserUpdate {
+	uu.mutation.AddAge(i)
+	return uu
+}
+
+// SetName sets the "name" field.
+func (uu *UserUpdate) SetName(s string) *UserUpdate {
+	uu.mutation.SetName(s)
+	return uu
+}
+
+// SetNickname sets the "nickname" field.
+func (uu *UserUpdate) SetNickname(s string) *UserUpdate {
+	uu.mutation.SetNickname(s)
 	return uu
 }
 
@@ -106,11 +125,32 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := uu.mutation.Username(); ok {
+	if value, ok := uu.mutation.Age(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldAge,
+		})
+	}
+	if value, ok := uu.mutation.AddedAge(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldAge,
+		})
+	}
+	if value, ok := uu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: user.FieldUsername,
+			Column: user.FieldName,
+		})
+	}
+	if value, ok := uu.mutation.Nickname(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldNickname,
 		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
@@ -132,9 +172,28 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
-// SetUsername sets the "username" field.
-func (uuo *UserUpdateOne) SetUsername(s string) *UserUpdateOne {
-	uuo.mutation.SetUsername(s)
+// SetAge sets the "age" field.
+func (uuo *UserUpdateOne) SetAge(i int) *UserUpdateOne {
+	uuo.mutation.ResetAge()
+	uuo.mutation.SetAge(i)
+	return uuo
+}
+
+// AddAge adds i to the "age" field.
+func (uuo *UserUpdateOne) AddAge(i int) *UserUpdateOne {
+	uuo.mutation.AddAge(i)
+	return uuo
+}
+
+// SetName sets the "name" field.
+func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
+	uuo.mutation.SetName(s)
+	return uuo
+}
+
+// SetNickname sets the "nickname" field.
+func (uuo *UserUpdateOne) SetNickname(s string) *UserUpdateOne {
+	uuo.mutation.SetNickname(s)
 	return uuo
 }
 
@@ -236,11 +295,32 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			}
 		}
 	}
-	if value, ok := uuo.mutation.Username(); ok {
+	if value, ok := uuo.mutation.Age(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldAge,
+		})
+	}
+	if value, ok := uuo.mutation.AddedAge(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldAge,
+		})
+	}
+	if value, ok := uuo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: user.FieldUsername,
+			Column: user.FieldName,
+		})
+	}
+	if value, ok := uuo.mutation.Nickname(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldNickname,
 		})
 	}
 	_node = &User{config: uuo.config}

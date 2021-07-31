@@ -1,0 +1,15 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "postgraphile --subscriptions --graphiql \"/\" --connection $DATABASE_URL",
+    "migrate": "graphile-migrate commit"
+  },
+  "devDependencies": {
+    "@graphile-contrib/pg-simplify-inflector": "^6.1.0",
+    "graphile-migrate": "^1.2.0",
+    "postgraphile": "^4.12.3"
+  }
+}
