@@ -1,0 +1,9 @@
+input NewUser {
+  name: String!
+}
+
+type User {
+  id: ID!
+  name: String!
+  friend: User
+}

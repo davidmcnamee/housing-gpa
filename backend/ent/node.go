@@ -6,7 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"student-housing-backend/ent/todo"
 	"student-housing-backend/ent/user"
 	"sync"
 	"sync/atomic"
@@ -45,16 +44,6 @@ type Edge struct {
 	Type string `json:"type,omitempty"` // edge type.
 	Name string `json:"name,omitempty"` // edge name.
 	IDs  []int  `json:"ids,omitempty"`  // node ids (where this edge point to).
-}
-
-func (t *Todo) Node(ctx context.Context) (node *Node, err error) {
-	node = &Node{
-		ID:     t.ID,
-		Type:   "Todo",
-		Fields: make([]*Field, 0),
-		Edges:  make([]*Edge, 0),
-	}
-	return node, nil
 }
 
 func (u *User) Node(ctx context.Context) (node *Node, err error) {
@@ -159,15 +148,6 @@ func (c *Client) Noder(ctx context.Context, id int, opts ...NodeOption) (_ Noder
 
 func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error) {
 	switch table {
-	case todo.Table:
-		n, err := c.Todo.Query().
-			Where(todo.ID(id)).
-			CollectFields(ctx, "Todo").
-			Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
 	case user.Table:
 		n, err := c.User.Query().
 			Where(user.ID(id)).
@@ -250,19 +230,6 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 		idmap[id] = append(idmap[id], &noders[i])
 	}
 	switch table {
-	case todo.Table:
-		nodes, err := c.Todo.Query().
-			Where(todo.IDIn(ids...)).
-			CollectFields(ctx, "Todo").
-			All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
 	case user.Table:
 		nodes, err := c.User.Query().
 			Where(user.IDIn(ids...)).

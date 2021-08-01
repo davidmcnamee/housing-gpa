@@ -7,13 +7,14 @@ import (
 	"os"
 	"student-housing-backend/ent"
 	"student-housing-backend/graph/generated"
-	"student-housing-backend/graph"
+	"student-housing-backend/graph/schema"
 
-	// _ "entgo.io/ent/cmd/ent"
 	_ "github.com/99designs/gqlgen/cmd"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/go-chi/chi"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/rs/cors"
 )
 
 func getDbClient() *ent.Client {
@@ -40,9 +41,17 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" { port = "8080" }
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{Client: client,}}))
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	router := chi.NewRouter()
+	router.Use(cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:"+port},
+		AllowCredentials: true,
+		Debug:            false,
+	}).Handler)
+
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &schema.Resolver{Client: client,}}))
+	router.Handle("/", playground.Handler("Student Housing", "/query"))
+	router.Handle("/query", srv)
+	
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }

@@ -2,6 +2,34 @@
 
 package model
 
+type AbstractNode interface {
+	IsAbstractNode()
+}
+
+type Connection interface {
+	IsConnection()
+}
+
+type PaginationEdge interface {
+	IsPaginationEdge()
+}
+
+type Address struct {
+	StreetNumber string `json:"streetNumber"`
+	StreetName   string `json:"streetName"`
+	AddressLine2 string `json:"addressLine2"`
+}
+
 type NewUser struct {
 	Name string `json:"name"`
+}
+
+type Property struct {
+	Address      *Address    `json:"address"`
+	BuildingName string      `json:"buildingName"`
+	RoomType     []*RoomType `json:"roomType"`
+}
+
+type RoomType struct {
+	NumBedrooms int `json:"numBedrooms"`
 }

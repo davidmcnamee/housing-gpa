@@ -1,0 +1,18 @@
+
+
+type Property {
+  address: Address!
+  buildingName: String!
+  roomType: [RoomType!]!
+}
+
+type RoomType {
+  numBedrooms: Int!
+}
+
+type Address {
+  streetNumber: String!
+  streetName: String!
+  addressLine2: String!
+  
+}

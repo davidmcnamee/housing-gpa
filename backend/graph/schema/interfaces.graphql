@@ -1,0 +1,28 @@
+
+# -- Relay Node Interface Spec --
+# https://relay.dev/graphql/objectidentification.htm
+
+interface AbstractNode {
+  id: ID!
+}
+
+# -- Relay Pagination Interface Spec --
+# https://relay.dev/graphql/connections.htm
+scalar Cursor
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: Cursor
+  endCursor: Cursor
+}
+
+interface Connection {
+  pageInfo: PageInfo!
+  edges: [PaginationEdge]!
+}
+
+interface PaginationEdge {
+  cursor: String!
+  node: AbstractNode!
+}
