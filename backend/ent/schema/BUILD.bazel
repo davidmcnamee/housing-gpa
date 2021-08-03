@@ -6,7 +6,7 @@ go_library(
     importpath = "student-housing-backend/ent/schema",
     visibility = ["//visibility:public"],
     deps = [
-        "@io_entgo_ent//:go_default_library",
-        "@io_entgo_ent//schema/field:go_default_library",
+        "@io_entgo_ent//:ent",
+        "@io_entgo_ent//schema/field",
     ],
 )

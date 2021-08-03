@@ -2,15 +2,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "graph",
-    srcs = [
-        "resolver.go",
-        "schema.resolvers.go",
-    ],
+    srcs = ["generate.go"],
     importpath = "student-housing-backend/graph",
     visibility = ["//visibility:public"],
-    deps = [
-        "//backend/ent",
-        "//backend/graph/generated",
-        "//backend/graph/model",
-    ],
 )

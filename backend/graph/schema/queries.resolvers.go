@@ -5,12 +5,18 @@ package schema
 
 import (
 	"context"
+	"fmt"
 	"student-housing-backend/ent"
 	"student-housing-backend/graph/generated"
+	"student-housing-backend/graph/model"
 )
 
 func (r *queryResolver) Users(ctx context.Context) ([]*ent.User, error) {
 	return r.Client.User.Query().All(context.Background())
+}
+
+func (r *queryResolver) Properties(ctx context.Context) ([]*model.Property, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 // Query returns generated.QueryResolver implementation.

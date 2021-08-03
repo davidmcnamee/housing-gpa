@@ -66,11 +66,13 @@ type ComplexityRoot struct {
 	Property struct {
 		Address      func(childComplexity int) int
 		BuildingName func(childComplexity int) int
+		Owner        func(childComplexity int) int
 		RoomType     func(childComplexity int) int
 	}
 
 	Query struct {
-		Users func(childComplexity int) int
+		Properties func(childComplexity int) int
+		Users      func(childComplexity int) int
 	}
 
 	RoomType struct {
@@ -89,6 +91,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Users(ctx context.Context) ([]*ent.User, error)
+	Properties(ctx context.Context) ([]*model.Property, error)
 }
 type UserResolver interface {
 	Friend(ctx context.Context, obj *ent.User) (*ent.User, error)
@@ -184,12 +187,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Property.BuildingName(childComplexity), true
 
+	case "Property.owner":
+		if e.complexity.Property.Owner == nil {
+			break
+		}
+
+		return e.complexity.Property.Owner(childComplexity), true
+
 	case "Property.roomType":
 		if e.complexity.Property.RoomType == nil {
 			break
 		}
 
 		return e.complexity.Property.RoomType(childComplexity), true
+
+	case "Query.properties":
+		if e.complexity.Query.Properties == nil {
+			break
+		}
+
+		return e.complexity.Query.Properties(childComplexity), true
 
 	case "Query.users":
 		if e.complexity.Query.Users == nil {
@@ -329,6 +346,7 @@ type Property {
   address: Address!
   buildingName: String!
   roomType: [RoomType!]!
+  owner: User!
 }
 
 type RoomType {
@@ -339,12 +357,12 @@ type Address {
   streetNumber: String!
   streetName: String!
   addressLine2: String!
-  
 }
 `, BuiltIn: false},
 	{Name: "graph/schema/queries.graphql", Input: `
 type Query {
   users: [User]
+  properties: [Property]
 }
 `, BuiltIn: false},
 	{Name: "graph/schema/user.graphql", Input: `input NewUser {
@@ -818,6 +836,41 @@ func (ec *executionContext) _Property_roomType(ctx context.Context, field graphq
 	return ec.marshalNRoomType2ᚕᚖstudentᚑhousingᚑbackendᚋgraphᚋmodelᚐRoomTypeᚄ(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Property_owner(ctx context.Context, field graphql.CollectedField, obj *model.Property) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Property",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Owner, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖstudentᚑhousingᚑbackendᚋentᚐUser(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_users(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -848,6 +901,38 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 	res := resTmp.([]*ent.User)
 	fc.Result = res
 	return ec.marshalOUser2ᚕᚖstudentᚑhousingᚑbackendᚋentᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_properties(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Properties(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Property)
+	fc.Result = res
+	return ec.marshalOProperty2ᚕᚖstudentᚑhousingᚑbackendᚋgraphᚋmodelᚐProperty(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2330,6 +2415,11 @@ func (ec *executionContext) _Property(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "owner":
+			out.Values[i] = ec._Property_owner(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2365,6 +2455,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_users(ctx, field)
+				return res
+			})
+		case "properties":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_properties(ctx, field)
 				return res
 			})
 		case "__type":
@@ -3100,6 +3201,53 @@ func (ec *executionContext) marshalOCursor2ᚖstudentᚑhousingᚑbackendᚋent�
 		return graphql.Null
 	}
 	return v
+}
+
+func (ec *executionContext) marshalOProperty2ᚕᚖstudentᚑhousingᚑbackendᚋgraphᚋmodelᚐProperty(ctx context.Context, sel ast.SelectionSet, v []*model.Property) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOProperty2ᚖstudentᚑhousingᚑbackendᚋgraphᚋmodelᚐProperty(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOProperty2ᚖstudentᚑhousingᚑbackendᚋgraphᚋmodelᚐProperty(ctx context.Context, sel ast.SelectionSet, v *model.Property) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Property(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

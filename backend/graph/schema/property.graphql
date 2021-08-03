@@ -1,6 +1,6 @@
 
 
-type Property {
+type Building {
   address: Address!
   buildingName: String!
   roomType: [RoomType!]!
@@ -14,5 +14,7 @@ type Address {
   streetNumber: String!
   streetName: String!
   addressLine2: String!
-  
+  # fill me in
 }
+
+# fill me in

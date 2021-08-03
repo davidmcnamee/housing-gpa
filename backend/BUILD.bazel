@@ -14,12 +14,14 @@ go_library(
     visibility = ["//visibility:private"],
     deps = [
         "//backend/ent",
-        "//backend/graph",
         "//backend/graph/generated",
+        "//backend/graph/schema",
         "@com_github_99designs_gqlgen//cmd",
         "@com_github_99designs_gqlgen//graphql/handler",
         "@com_github_99designs_gqlgen//graphql/playground",
-        "@com_github_mattn_go_sqlite3//:go_default_library",
+        "@com_github_go_chi_chi//:chi",
+        "@com_github_mattn_go_sqlite3//:go-sqlite3",
+        "@com_github_rs_cors//:cors",
     ],
 )
 

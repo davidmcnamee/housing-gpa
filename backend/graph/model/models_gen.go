@@ -2,6 +2,10 @@
 
 package model
 
+import (
+	"student-housing-backend/ent"
+)
+
 type AbstractNode interface {
 	IsAbstractNode()
 }
@@ -28,6 +32,7 @@ type Property struct {
 	Address      *Address    `json:"address"`
 	BuildingName string      `json:"buildingName"`
 	RoomType     []*RoomType `json:"roomType"`
+	Owner        *ent.User   `json:"owner"`
 }
 
 type RoomType struct {

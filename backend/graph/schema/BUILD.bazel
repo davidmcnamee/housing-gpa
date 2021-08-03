@@ -1,0 +1,18 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "schema",
+    srcs = [
+        "mutations.resolvers.go",
+        "queries.resolvers.go",
+        "resolver.go",
+        "user.resolvers.go",
+    ],
+    importpath = "student-housing-backend/graph/schema",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//backend/ent",
+        "//backend/graph/generated",
+        "//backend/graph/model",
+    ],
+)
