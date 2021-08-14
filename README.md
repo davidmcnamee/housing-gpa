@@ -27,9 +27,10 @@ Create a `.env` file in the root directory (containing the secrets given to you)
 
 ## Roadmap
 
-Attributes needed:
-* address or building name or approximate location
-* price
-* number of rooms total
-* 
-* 
+- [x] Cluster & Dev environment setup
+- [x] Backend GraphQL API functional
+- [ ] first draft of site
+- [x] initial database population with python scripts
+- [ ] launch, promotion, user feedback
+
+
